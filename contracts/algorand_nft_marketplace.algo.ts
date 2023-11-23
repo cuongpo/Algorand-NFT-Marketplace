@@ -1,47 +1,115 @@
 import { Contract } from '@algorandfoundation/tealscript';
 
+type collectionData = {
+  name: string;
+  owner: Address;
+};
+
+type nftData = {
+  collectionId: number;
+  nftAsset: Asset;
+};
+
+type orderData = {
+  owner: Address;
+  price: uint64;
+  nft: Asset;
+  status: uint64; // 0 false 1 true
+};
+
 // eslint-disable-next-line no-unused-vars
 class AlgorandNftMarketplace extends Contract {
-  /**
-   * Calculates the sum of two numbers
-   *
-   * @param a
-   * @param b
-   * @returns The sum of a and b
-   */
-  private getSum(a: number, b: number): number {
-    return a + b;
+  collectionIndex = GlobalStateKey<uint64>();
+
+  collection = BoxMap<uint64, collectionData>({});
+
+  nft = GlobalStateKey<Asset>();
+
+  nftIndex = GlobalStateKey<uint64>();
+
+  nftDataMap = BoxMap<uint64, nftData>({ prefix: 'n' });
+
+  orderIndex = GlobalStateKey<uint64>();
+
+  order = BoxMap<uint64, orderData>({ prefix: 'o' });
+
+  createCollection(name: string): void {
+    const temp: collectionData = {
+      name: name,
+      owner: this.txn.sender,
+    };
+
+    this.collection(this.collectionIndex.value).value = temp;
+    this.collectionIndex.value = this.collectionIndex.value + 1;
   }
 
-  /**
-   * Calculates the difference between two numbers
-   *
-   * @param a
-   * @param b
-   * @returns The difference between a and b.
-   */
-  private getDifference(a: number, b: number): number {
-    return a >= b ? a - b : b - a;
+  mintNFT(name: string, url: string): Asset {
+    const nftTicket = sendAssetCreation({
+      configAssetTotal: 1,
+      configAssetName: name,
+      configAssetURL: url,
+    });
+    return nftTicket;
   }
 
-  /**
-   * A method that takes two numbers and does either addition or subtraction
-   *
-   * @param a The first number
-   * @param b The second number
-   * @param operation The operation to perform. Can be either 'sum' or 'difference'
-   *
-   * @returns The result of the operation
-   */
-  doMath(a: number, b: number, operation: string): number {
-    let result: number;
+  mapNFTdata(nft: Asset, collectionId: uint64): void {
+    const temp: nftData = {
+      collectionId: collectionId,
+      nftAsset: nft,
+    };
 
-    if (operation === 'sum') {
-      result = this.getSum(a, b);
-    } else if (operation === 'difference') {
-      result = this.getDifference(a, b);
-    } else throw Error('Invalid operation');
+    this.nftDataMap(this.nftIndex.value).value = temp;
+    this.nftIndex.value = this.nftIndex.value + 1;
+  }
 
-    return result;
+  listingNFT(nft: Asset, price: number, axfer: AssetTransferTxn): void {
+    // verfiy Txn
+    verifyTxn(axfer, { assetReceiver: this.app.address });
+
+    // create order
+    const temp: orderData = {
+      owner: this.txn.sender,
+      price: price,
+      nft: nft,
+      status: 0,
+    };
+
+    this.order(this.orderIndex.value).value = temp;
+    this.orderIndex.value = this.orderIndex.value + 1;
+  }
+
+  unListingNFT(orderId: number, nft: Asset): void {
+    // verify owner
+    assert(this.txn.sender === this.order(orderId).value.owner);
+
+    // check Status of NFT
+    assert(this.order(orderId).value.status === 1);
+
+    this.order(orderId).value.status = 1;
+
+    // Transfer NFT to owner
+    sendAssetTransfer({
+      xferAsset: nft,
+      assetReceiver: this.txn.sender,
+      assetAmount: 1,
+    });
+  }
+
+  buyNFTFromMarketplace(orderId: number, payment: PayTxn, nft: Asset): void {
+    // Check order status
+    assert(this.order(orderId).value.status === 0);
+    // Check enough money to buy
+    verifyTxn(payment, {
+      sender: this.txn.sender,
+      amount: { greaterThan: this.order(orderId).value.price },
+      receiver: this.order(orderId).value.owner,
+    });
+
+    // Transfer Asset
+    sendAssetTransfer({
+      xferAsset: nft,
+      assetReceiver: this.txn.sender,
+      assetAmount: 1,
+    });
   }
 }

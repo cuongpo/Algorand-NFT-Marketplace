@@ -1,0 +1,140 @@
+{
+  "name": "AlgorandNftMarketplace",
+  "desc": "",
+  "methods": [
+    {
+      "name": "createCollection",
+      "args": [
+        {
+          "name": "name",
+          "type": "string",
+          "desc": ""
+        }
+      ],
+      "desc": "",
+      "returns": {
+        "type": "void",
+        "desc": ""
+      }
+    },
+    {
+      "name": "mintNFT",
+      "args": [
+        {
+          "name": "name",
+          "type": "string",
+          "desc": ""
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "desc": ""
+        }
+      ],
+      "desc": "",
+      "returns": {
+        "type": "uint64",
+        "desc": ""
+      }
+    },
+    {
+      "name": "mapNFTdata",
+      "args": [
+        {
+          "name": "nft",
+          "type": "asset",
+          "desc": ""
+        },
+        {
+          "name": "collectionId",
+          "type": "uint64",
+          "desc": ""
+        }
+      ],
+      "desc": "",
+      "returns": {
+        "type": "void",
+        "desc": ""
+      }
+    },
+    {
+      "name": "listingNFT",
+      "args": [
+        {
+          "name": "nft",
+          "type": "asset",
+          "desc": ""
+        },
+        {
+          "name": "price",
+          "type": "uint64",
+          "desc": ""
+        },
+        {
+          "name": "axfer",
+          "type": "axfer",
+          "desc": ""
+        }
+      ],
+      "desc": "",
+      "returns": {
+        "type": "void",
+        "desc": ""
+      }
+    },
+    {
+      "name": "unListingNFT",
+      "args": [
+        {
+          "name": "orderId",
+          "type": "uint64",
+          "desc": ""
+        },
+        {
+          "name": "nft",
+          "type": "asset",
+          "desc": ""
+        }
+      ],
+      "desc": "",
+      "returns": {
+        "type": "void",
+        "desc": ""
+      }
+    },
+    {
+      "name": "buyNFTFromMarketplace",
+      "args": [
+        {
+          "name": "orderId",
+          "type": "uint64",
+          "desc": ""
+        },
+        {
+          "name": "payment",
+          "type": "pay",
+          "desc": ""
+        },
+        {
+          "name": "nft",
+          "type": "asset",
+          "desc": ""
+        }
+      ],
+      "desc": "",
+      "returns": {
+        "type": "void",
+        "desc": ""
+      }
+    },
+    {
+      "name": "createApplication",
+      "desc": "",
+      "returns": {
+        "type": "void",
+        "desc": ""
+      },
+      "args": []
+    }
+  ]
+}
